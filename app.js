@@ -5,8 +5,9 @@ const readline = require("readline").createInterface({
   output: process.stdout,
 });
 
+let fileName = "";
+
 async function scrap(url) {
-  console.log("--------Scraping--------");
   const browser = await puppeeter.launch();
   const page = await browser.newPage();
   await page.goto(url);
@@ -18,7 +19,8 @@ async function scrap(url) {
       (e) => e.querySelector("#meta a").href.split("&list")[0]
     )
   );
-  let fileName = title.replace(/\s/g, "");
+
+  fileName = fileName ? fileName : title;
   const writeStream = fs.createWriteStream(`${fileName}.txt`);
   const pathName = writeStream.path;
 
@@ -38,7 +40,12 @@ async function scrap(url) {
   await browser.close();
 }
 
-readline.question("Enter URL of the playlist: ", (url) => {
-  scrap(url);
-  readline.close();
-});
+readline.question(
+  "Enter URL of the playlist and name of the file with separating comma(,): ",
+  (userInput) => {
+    userInput = userInput.split(",");
+    fileName = userInput[1];
+    scrap(userInput[0]);
+    readline.close();
+  }
+);
